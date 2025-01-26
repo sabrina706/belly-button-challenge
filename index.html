@@ -25,7 +25,7 @@
             <div class="col-md-3">
                 <div class="card card-body bg-light">
                     <h6>Test Subject ID Number:</h6>
-                    <select id="selDataset" onchange="optionChanged(this.value)"></select>
+                    <select id="selDataset" onchange="updateVisualizations(this.value)"></select>
                 </div>
                 <br>
                 <div class="card card-primary">
@@ -51,9 +51,8 @@
     <!-- Load external JavaScript libraries -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
-    <!-- Ensure the path to app.js is correct -->
-  
     <script src="./static/js/app.js"></script>
+
 </body>
+
 </html>

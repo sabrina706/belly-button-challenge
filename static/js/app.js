@@ -1,33 +1,33 @@
-// URL of the JSON data
-const dataUrl = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json";
+// Define the URL for the JSON data
+const jsonDataUrl = "https://static.bc-edx.com/data/dl-1-2/m14/lms/starter/samples.json";
 
-// Build the metadata panel
-function buildMetadata(sample) {
-    d3.json(dataUrl).then((data) => {
-        let metadata = data.metadata;
-        let result = metadata.find(obj => obj.id == sample);
+// Function to display metadata information
+function displayMetadata(sampleId) {
+    d3.json(jsonDataUrl).then((data) => {
+        let metadataList = data.metadata;
+        let selectedMetadata = metadataList.find(entry => entry.id == sampleId);
 
-        let display = d3.select("#sample-metadata");
-        display.html(""); // Clear previous metadata
+        let metadataPanel = d3.select("#sample-metadata");
+        metadataPanel.html(""); // Clear any existing content
 
-        Object.entries(result).forEach(([key, value]) => {
-            display.append("h6").text(`${key.toUpperCase()}: ${value}`);
+        Object.entries(selectedMetadata).forEach(([key, value]) => {
+            metadataPanel.append("h6").text(`${key.toUpperCase()}: ${value}`);
         });
     });
 }
 
-// Function to build both charts
-function buildCharts(sample) {
-    d3.json(dataUrl).then((data) => {
-        let sampleData = data.samples;
-        let result = sampleData.find(obj => obj.id == sample);
+// Function to generate charts for the selected sample
+function createCharts(sampleId) {
+    d3.json(jsonDataUrl).then((data) => {
+        let samplesArray = data.samples;
+        let selectedSample = samplesArray.find(entry => entry.id == sampleId);
 
-        let otuIds = result.otu_ids;
-        let otuLabels = result.otu_labels;
-        let sampleValues = result.sample_values;
+        let otuIds = selectedSample.otu_ids;
+        let otuLabels = selectedSample.otu_labels;
+        let sampleValues = selectedSample.sample_values;
 
-        // Bubble Chart
-        let bubbleData = [{
+        // Generate the bubble chart
+        let bubbleChartData = [{
             x: otuIds,
             y: sampleValues,
             text: otuLabels,
@@ -35,12 +35,12 @@ function buildCharts(sample) {
             marker: {
                 size: sampleValues,
                 color: otuIds,
-                colorscale: "YlGnBu",
+                colorscale: "Reds",
                 showscale: true
             }
         }];
 
-        let bubbleLayout = {
+        let bubbleChartLayout = {
             title: 'Bacterial Cultures per Sample',
             xaxis: { title: 'OTU ID' },
             yaxis: { title: 'Number of Bacteria' },
@@ -49,53 +49,54 @@ function buildCharts(sample) {
             font: { color: 'black' }
         };
 
-        Plotly.newPlot("bubble", bubbleData, bubbleLayout);
+        Plotly.newPlot("bubble", bubbleChartData, bubbleChartLayout);
 
-        // Bar Chart
-        let barData = [{
-            y: otuIds.slice(0, 10).map(val => `OTU ${val}`).reverse(),
+        // Generate the bar chart
+        let barChartData = [{
+            y: otuIds.slice(0, 10).map(id => `OTU ${id}`).reverse(),
             x: sampleValues.slice(0, 10).reverse(),
             text: otuLabels.slice(0, 10).reverse(),
             type: "bar",
             orientation: "h",
             marker: {
                 color: otuIds.slice(0, 10).reverse(),
-                colorscale: "YlGnBu",
+                colorscale: "Reds",
                 showscale: true
             }
         }];
 
-        let barLayout = {
-            title: 'Top Ten Bacteria Cultures Found',
+        let barChartLayout = {
+            title: 'Top 10 Bacteria Cultures Found',
             xaxis: { title: 'Number of Bacteria' },
             plot_bgcolor: 'white'
         };
 
-        Plotly.newPlot("bar", barData, barLayout);
+        Plotly.newPlot("bar", barChartData, barChartLayout);
     });
 }
 
-// Function to initialize the page
-function init() {
-    d3.json(dataUrl).then((data) => {
-        let sampleNames = data.names;
-        let dropdown = d3.select("#selDataset");
+// Function to initialize the page content
+function initializeDashboard() {
+    d3.json(jsonDataUrl).then((data) => {
+        let sampleOptions = data.names;
+        let dropdownMenu = d3.select("#selDataset");
 
-        sampleNames.forEach((sample) => {
-            dropdown.append("option").text(sample).property("value", sample);
+        sampleOptions.forEach((sample) => {
+            dropdownMenu.append("option").text(sample).property("value", sample);
         });
 
-        let firstSample = sampleNames[0];
-        buildMetadata(firstSample);
-        buildCharts(firstSample);
+        let initialSample = sampleOptions[0];
+        displayMetadata(initialSample);
+        createCharts(initialSample);
     });
 }
 
-// Function to update charts when a new sample is selected
-function optionChanged(newSample) {
-    buildMetadata(newSample);
-    buildCharts(newSample);
+// Function to update the visualizations when a different sample is selected
+function updateVisualizations(newSampleId) {
+    displayMetadata(newSampleId);
+    createCharts(newSampleId);
 }
 
 // Initialize the dashboard
-init();
+initializeDashboard();
+
